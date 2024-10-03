@@ -1,0 +1,43 @@
+/* src/App.css */
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(to right, #1976d2, #9c27b0);
+  height: 100vh;
+}
+
+#root {
+  height: 100%;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  opacity: 0;
+  animation: fadeIn 1.5s ease-in forwards;
+}
+
+/* Fade-in animation for container */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+button {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+}
+
+button:hover {
+  transform: translateY(-3px); /* Lift button slightly */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Shadow on hover */
+}
+
+button:active {
+  transform: translateY(1px); /* Slight press-down effect */
+}
