@@ -5,7 +5,7 @@ import LandingPage from './components/LandingPage';
 import CreateSessionPage from './components/CreateSessionPage';
 import VotingSessionPage from './components/VotingSessionPage';
 import Sidebar from './components/Sidebar';  // Sidebar Component
-import './App.css'; // This will work if App.css is inside src/
+import './App.css'; // This will work if App.css is inside src
 
 function App() {
   return (
