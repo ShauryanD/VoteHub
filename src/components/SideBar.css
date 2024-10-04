@@ -1,0 +1,34 @@
+/* Sidebar Styling */
+.sidebar {
+    width: 220px;
+    background-color: #2F3E46;
+    /* Dark blue-ish color for sidebar */
+    color: white;
+    height: 100vh;
+    /* Full height */
+    padding: 20px;
+    position: fixed;
+    /* Keeps the sidebar fixed on the left */
+    display: flex;
+    flex-direction: column;
+}
+
+.menu {
+    list-style: none;
+    padding: 0;
+}
+
+.menu li {
+    margin: 20px 0;
+    font-size: 1.2rem;
+}
+
+.menu li a {
+    color: white;
+    text-decoration: none;
+}
+
+.menu li a:hover {
+    color: #9c27b0;
+    /* Secondary color for hover effect */
+}
