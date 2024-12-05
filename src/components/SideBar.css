@@ -2,33 +2,64 @@
 .sidebar {
     width: 220px;
     background-color: #2F3E46;
-    /* Dark blue-ish color for sidebar */
     color: white;
     height: 100vh;
-    /* Full height */
     padding: 20px;
     position: fixed;
-    /* Keeps the sidebar fixed on the left */
+    left: 0;
+    top: 0;
     display: flex;
     flex-direction: column;
-}
-
-.menu {
-    list-style: none;
-    padding: 0;
+    justify-content: space-between;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 0 15px 15px 0;
 }
 
 .menu li {
-    margin: 20px 0;
-    font-size: 1.2rem;
+    margin: 5px 0;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
 }
 
-.menu li a {
-    color: white;
+.menu li:hover {
+    background-color: #3D565D;
+    /* Hover background */
+}
+.menu a{
     text-decoration: none;
 }
 
+/* Default link style */
+.menu li a {
+    color: white;
+    /* Link color */
+    text-decoration: none;
+}
+
+/* Override hover behavior */
 .menu li a:hover {
-    color: #9c27b0;
-    /* Secondary color for hover effect */
+    color: white;
+    /* Keep the color white on hover */
+}
+
+/* Ensure visited links stay white */
+.menu li a:visited {
+    color: white;
+    /* Prevent purple or any other color for visited links */
+}
+
+/* Explicitly ensure visited links stay white even on hover */
+.menu li a:visited:hover {
+    color: white;
+    /* Same white on visited and hover */
+}
+
+.menu{
+    list-style: none;
+    padding: 20px;
 }

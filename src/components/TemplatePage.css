@@ -1,0 +1,17 @@
+.template-page {
+  padding: 40px;
+  background-color: #f4f4f9;
+}
+
+.template-card {
+  margin-top: 20px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.template-card:hover {
+  transform: translateY(-5px);
+}

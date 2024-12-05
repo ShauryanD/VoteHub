@@ -1,0 +1,42 @@
+.create-session-page {
+  padding: 40px;
+  background-color: white;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  /* Add shadow for clean form look */
+  border-radius: 10px;
+  max-width: 600px;
+  margin: 20px auto;
+  /* Center form */
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.form-field label {
+  font-size: 1.2rem;
+  color: #2F3E46;
+}
+
+.form-field input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.create-session-btn {
+  background-color: #1976d2;
+  color: white;
+  padding: 15px;
+  border: none;
+  border-radius: 5px;
+  width: 100%;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.create-session-btn:hover {
+  background-color: #1565c0;
+}

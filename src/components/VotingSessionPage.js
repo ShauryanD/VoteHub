@@ -1,117 +1,109 @@
-// Votehub - Voting Session Management
-
 import React, { useState, useEffect } from 'react';
-import { Container, Button, Typography, Grid } from '@mui/material';
 import { useParams } from 'react-router-dom';
+import { Container, Button, Typography, Grid } from '@mui/material';
 import { io } from 'socket.io-client';
-
+function getOrSetUUID() {
+  const existingUUID = document.cookie.split('; ').find(row => row.startsWith('uuid='));
+  if (existingUUID) {
+    return existingUUID.split('=')[1];
+  } else {
+    const uuid = crypto.randomUUID();
+    document.cookie = `uuid=${uuid}; max-age=${60 * 60 * 24 * 365}; path=/`;  // Cookie expires in 1 year
+    return uuid;
+  }
+}
 function VotingSessionPage() {
-  const { sessionId } = useParams();  // Get session ID from the URL
-  const [vote, setVote] = useState(null);
-  const [results, setResults] = useState({});
-  const [options, setOptions] = useState([]);
-  const [socket, setSocket] = useState(null);
+  const { sessionId } = useParams();  // Get the session ID from the URL
+  const [questions, setQuestions] = useState([]);  // Array of questions and options
+  const [selectedOptions, setSelectedOptions] = useState({});  // Track selected option for each question
   const [submitted, setSubmitted] = useState(false);
+  const [socket, setSocket] = useState(null);
+  const userUUID = getOrSetUUID();
 
   useEffect(() => {
-    // Initialize socket connection
-    const newSocket = io('http://localhost:4000');
+    const newSocket = io('http://localhost:4000');  // Connect to the backend
     setSocket(newSocket);
-
-    // Join the session
+    console.log("session ID: ",typeof(sessionId))
+    // Emit the joinSession event to the backend with the session ID
     newSocket.emit('joinSession', sessionId);
 
-    // Receive options for voting
-    newSocket.on('sessionOptions', (availableOptions) => {
-      setOptions(availableOptions);  // Set the available options
+    // Listen for session details from the backend
+    newSocket.on('sessionDetails', (data) => {
+      console.log('Received session details:', data);  // Debugging log
+      setQuestions(data.questions);  // Set all questions
     });
 
-    // Handle session error
-    newSocket.on('sessionError', (message) => {
-      alert(message);
+    // Listen for real-time updates to votes
+    newSocket.on('updateVotes', (updatedSession) => {
+      setQuestions(updatedSession.questions);  // Update the questions with the latest votes
+    });
+    newSocket.on('voteError', (errorMessage) => {
+      alert(errorMessage);  // Display error message to the user
     });
 
-    // Update votes
-    newSocket.on('updateVotes', (updatedVotes) => {
-      setResults(updatedVotes);
-    });
-
-    // Cleanup the socket connection on unmount
-    return () => newSocket.disconnect();
+    // Clean up the socket connection when the component unmounts
+    return () => {
+      newSocket.disconnect();
+    };
   }, [sessionId]);
 
-  // Handle vote selection
-  const handleVote = (value) => {
-    setVote(value);
+  const handleOptionSelect = (questionIndex, optionText) => {
+    setSelectedOptions((prev) => ({
+      ...prev,
+      [questionIndex]: optionText,
+    }));
   };
 
-  // Submit vote
-  const handleSubmit = () => {
-    if (socket && vote !== null) {
-      socket.emit('submitVote', { sessionId, vote });
-      setSubmitted(true);
-    } else {
-      alert("Please select an option before submitting.");
+  const handleVoteSubmit = () => {
+    if (socket && Object.keys(selectedOptions).length === questions.length) {
+      // Create a single payload with all selected options
+      const votes = Object.entries(selectedOptions).map(([questionIndex, optionText]) => ({
+        questionIndex: Number(questionIndex),
+        optionText,
+      }));
+  
+      // Emit a single submitVote event with all votes included
+      socket.emit('submitVote', { sessionId, votes, userUUID });
+  
+      setSubmitted(true);  // Mark vote as submitted
     }
   };
 
   return (
-    <Container className="page-container">
-      <Typography variant="h4">{sessionId} Voting Session</Typography>
-      <Typography variant="h6" style={{ marginBottom: '20px' }}>Vote for the best option below</Typography>
-      
-      {/* Show voting options */}
-      <Grid container spacing={2} justifyContent="center">
-        {options.length > 0 ? (
-          options.map((option, index) => (
-            <Grid item key={index}>
-              <Button
-                variant={vote === option ? 'contained' : 'outlined'}
-                onClick={() => handleVote(option)}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: vote === option ? '#1976d2' : '#fff',
-                  color: vote === option ? '#fff' : '#1976d2',
-                  borderColor: '#1976d2',
-                  borderRadius: '5px',
-                  pointerEvents: submitted ? 'none' : 'auto',
-                  opacity: submitted ? 0.6 : 1,
-                }}
-                disabled={submitted}
-              >
-                {option}
-              </Button>
-            </Grid>
-          ))
-        ) : (
-          <Typography variant="body1" style={{ color: '#555' }}>No options available for voting.</Typography>
-        )}
-      </Grid>
-      
-      {/* Submit button */}
+    <Container>
+      <Typography variant="h4">Voting Session: {sessionId}</Typography>
+
+      {questions.map((question, questionIndex) => (
+        <div key={questionIndex} style={{ marginBottom: '20px' }}>
+          <Typography variant="h5" style={{ marginBottom: '10px' }}>{question.questionText}</Typography>
+
+          <Grid container spacing={2}>
+            {question.options.map((option, optionIndex) => (
+              <Grid item xs={12} sm={6} key={optionIndex}>
+                <Button
+                  variant={selectedOptions[questionIndex] === option.text ? 'contained' : 'outlined'}
+                  onClick={() => handleOptionSelect(questionIndex, option.text)}
+                  fullWidth
+                  disabled={submitted}  // Disable selection after submitting vote
+                >
+                  {option.text} 
+                </Button>
+              </Grid>
+            ))}
+          </Grid>
+        </div>
+      ))}
+
       <Button
         variant="contained"
         color="primary"
-        onClick={handleSubmit}
-        style={{ marginTop: '20px', padding: '10px 20px' }}
-        disabled={submitted}
+        fullWidth
+        onClick={handleVoteSubmit}
+        disabled={submitted || Object.keys(selectedOptions).length !== questions.length}  // Disable if vote is submitted or not all options selected
+        style={{ marginTop: '20px' }}
       >
         {submitted ? 'Vote Submitted' : 'Submit Vote'}
       </Button>
-
-      {/* Real-time results */}
-      <Typography variant="h5" style={{ marginTop: '40px' }}>Real-Time Results</Typography>
-      <div style={{ marginTop: '20px' }}>
-        {Object.keys(results).length > 0 ? (
-          Object.keys(results).map((key) => (
-            <Typography key={key} variant="body1" style={{ color: '#333', marginBottom: '10px' }}>
-              {key}: {results[key]} vote(s)
-            </Typography>
-          ))
-        ) : (
-          <Typography variant="body1" style={{ color: '#555' }}>No votes yet.</Typography>
-        )}
-      </div>
     </Container>
   );
 }
